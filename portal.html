@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Portal</title>
+    <link rel="stylesheet" href="styles/layout.css">
+    <link rel="stylesheet" href="styles/account.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Khula:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2.5rem;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-brand-logo {
+            height: 28px;
+            width: auto;
+        }
+
+        .nav-brand-sep {
+            width: 1px;
+            height: 20px;
+            background: #d1d5db;
+        }
+
+        .nav-brand-app {
+            font-family: 'Poppins', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .btn-signout {
+            padding: 0.4rem 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            background: white;
+            font-size: 13px;
+            font-weight: 500;
+            color: #6b7280;
+            cursor: pointer;
+            font-family: inherit;
+            text-decoration: none;
+        }
+
+        .btn-signout:hover {
+            background: #f9fafb;
+            color: #374151;
+        }
+
+        .welcome {
+            margin-bottom: 2rem;
+        }
+
+        .welcome-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 0.25rem;
+        }
+
+        .welcome-sub {
+            font-size: 15px;
+            color: #6b7280;
+        }
+
+        .apps-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .app-tile {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: box-shadow 0.15s, border-color 0.15s;
+        }
+
+        .app-tile:hover {
+            border-color: #005596;
+            box-shadow: 0 4px 16px rgba(0,85,150,0.1);
+        }
+
+        .app-tile-icon {
+            font-size: 32px;
+            margin-bottom: 0.875rem;
+        }
+
+        .app-tile-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <div class="nav-brand">
+                <img src="assets/improving-logo-simple.png" alt="Improving" class="nav-brand-logo">
+                <span class="nav-brand-sep"></span>
+                <span class="nav-brand-app">Project Portal</span>
+            </div>
+            <div class="nav-right">
+                <!-- TODO: update href to account page URL once known -->
+                <a href="#ACCOUNT_URL" class="btn-user">
+                    <div class="btn-user-avatar">AD</div>
+                    Austin Dircks
+                </a>
+                <a href="index.html" class="btn-signout">Sign out</a>
+            </div>
+        </nav>
+
+        <div class="welcome">
+            <div class="welcome-title">Welcome back</div>
+            <p class="welcome-sub">Select an application to get started.</p>
+        </div>
+
+        <div class="apps-label">Applications</div>
+        <div class="app-grid">
+            <!-- TODO: update href to the deployed revenue-analysis-app URL once known -->
+            <a href="#REVENUE_APP_URL" class="app-tile">
+                <div class="app-tile-icon">📈</div>
+                <div class="app-tile-name">Project Revenue Forecasting</div>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

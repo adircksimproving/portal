@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — Project Portal</title>
+    <link rel="stylesheet" href="styles/layout.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Khula:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+        }
+
+        .login-logo {
+            margin-bottom: 1.5rem;
+        }
+
+        .login-logo img {
+            height: 52px;
+            width: auto;
+        }
+
+        .login-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 0.25rem;
+        }
+
+        .login-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+
+        .field {
+            margin-bottom: 1.25rem;
+        }
+
+        .field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.4rem;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 0.625rem 0.75rem;
+            border: 1.5px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.15s;
+            box-sizing: border-box;
+        }
+
+        .field input:focus {
+            border-color: #005596;
+            box-shadow: 0 0 0 3px rgba(0,85,150,0.1);
+        }
+
+        .field input.invalid {
+            border-color: #dc2626;
+        }
+
+        .field-error {
+            font-size: 12px;
+            color: #dc2626;
+            margin-top: 0.3rem;
+            display: none;
+        }
+
+        .field-error.visible {
+            display: block;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 0.7rem;
+            background: #005596;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: background 0.15s;
+        }
+
+        .btn-login:hover {
+            background: #004a80;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="login-logo">
+            <img src="assets/improving-logo-full.png" alt="Improving">
+        </div>
+        <div class="login-title">Project Portal</div>
+        <p class="login-subtitle">Sign in to continue</p>
+
+        <form id="loginForm" novalidate>
+            <div class="field">
+                <label for="email">Email address</label>
+                <input type="email" id="email" placeholder="you@example.com" autocomplete="email" />
+                <div class="field-error" id="emailError">Please enter your email address.</div>
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" />
+                <div class="field-error" id="passwordError">Please enter your password.</div>
+            </div>
+            <button type="submit" class="btn-login">Sign in</button>
+        </form>
+    </div>
+
+    <script type="module">
+        const form = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const emailOk = emailInput.value.trim().length > 0;
+            const passwordOk = passwordInput.value.trim().length > 0;
+
+            emailInput.classList.toggle('invalid', !emailOk);
+            document.getElementById('emailError').classList.toggle('visible', !emailOk);
+
+            passwordInput.classList.toggle('invalid', !passwordOk);
+            document.getElementById('passwordError').classList.toggle('visible', !passwordOk);
+
+            if (emailOk && passwordOk) {
+                window.location.href = 'portal.html';
+            }
+        });
+
+        // Clear validation state as the user types
+        [emailInput, passwordInput].forEach(input => {
+            input.addEventListener('input', () => {
+                input.classList.remove('invalid');
+                document.getElementById(input.id + 'Error').classList.remove('visible');
+            });
+        });
+    </script>
+</body>
+</html>
