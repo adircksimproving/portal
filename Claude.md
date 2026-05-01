@@ -82,6 +82,9 @@ Key files to read before making broad changes:
 - Branch naming: `feature/short-description` or `fix/short-description`
 - Commit messages: short, present-tense (e.g. "Add consultant search filter")
 
+## Hosting
+- This app is hosted on Railway. Production URL: https://portal-production-2c38.up.railway.app/
+
 ---
 
 ## Notes for Claude
