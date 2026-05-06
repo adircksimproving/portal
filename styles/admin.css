@@ -1,0 +1,78 @@
+.admin-create-form {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.admin-create-form input[type="text"],
+.admin-create-form input[type="password"] {
+    flex: 1 1 200px;
+    padding: 0.5rem 0.75rem;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+}
+.admin-create-form input:focus { border-color: #005596; }
+.admin-create-form .btn-primary { width: auto; padding: 0.55rem 1.25rem; }
+
+.admin-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 13px;
+    color: #374151;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+.admin-table th, .admin-table td {
+    text-align: left;
+    padding: 0.625rem 0.75rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+.admin-table th {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.admin-actions {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+.admin-actions form { display: inline; margin: 0; }
+.admin-actions button {
+    padding: 0.3rem 0.6rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: white;
+    font-size: 12px;
+    font-weight: 500;
+    color: #374151;
+    cursor: pointer;
+    font-family: inherit;
+}
+.admin-actions button:hover:not(:disabled) {
+    background: #f9fafb;
+    border-color: #d1d5db;
+}
+.admin-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+.admin-actions .btn-danger { color: #b91c1c; border-color: #fecaca; }
+.admin-actions .btn-danger:hover:not(:disabled) { background: #fef2f2; border-color: #fca5a5; }
+
+.badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.badge-admin { color: #005596; background: rgba(0,85,150,0.07); }

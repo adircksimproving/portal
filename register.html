@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign in — Project Portal</title>
+    <title>Create account — Project Portal</title>
     <link rel="stylesheet" href="/styles/layout.css">
     <link rel="stylesheet" href="/styles/auth.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Khula:wght@400;600;700&display=swap" rel="stylesheet">
@@ -13,35 +13,34 @@
         <div class="auth-logo">
             <img src="/assets/improving-logo-full.png" alt="Improving">
         </div>
-        <div class="auth-title">Project Portal</div>
-        <p class="auth-subtitle">Sign in to continue</p>
+        <div class="auth-title">Create your account</div>
+        <p class="auth-subtitle">Pick a username and password to get started.</p>
 
         <div id="flash" class="auth-flash" hidden></div>
 
-        <form method="POST" action="/auth/login" autocomplete="on">
+        <form method="POST" action="/auth/register" autocomplete="on">
             <div class="field">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required autocomplete="username" />
             </div>
             <div class="field">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" required autocomplete="current-password" />
+                <input type="password" id="password" name="password" required autocomplete="new-password" minlength="10" />
+                <div class="field-hint">At least 10 characters, with letters and numbers.</div>
             </div>
-            <button type="submit" class="btn-primary">Sign in</button>
+            <button type="submit" class="btn-primary">Create account</button>
         </form>
 
         <p class="auth-foot">
-            Need an account? <a href="/register">Create one</a>
+            Already have an account? <a href="/">Sign in</a>
         </p>
     </div>
 
     <script>
         const params = new URLSearchParams(location.search);
         const error = params.get('error');
-        const ok = params.get('ok');
         const flash = document.getElementById('flash');
         if (error) { flash.textContent = error; flash.className = 'auth-flash auth-flash-error'; flash.hidden = false; }
-        else if (ok) { flash.textContent = ok; flash.className = 'auth-flash auth-flash-ok'; flash.hidden = false; }
     </script>
 </body>
 </html>

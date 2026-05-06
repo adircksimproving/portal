@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — Project Portal</title>
+    <link rel="stylesheet" href="/styles/layout.css">
+    <link rel="stylesheet" href="/styles/account.css">
+    <link rel="stylesheet" href="/styles/auth.css">
+    <link rel="stylesheet" href="/styles/admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Khula:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="impersonation-banner" class="impersonation-banner" hidden></div>
+    <div class="container">
+        <nav class="nav">
+            <div class="nav-brand">
+                <a href="/portal"><img src="/assets/improving-logo-simple.png" alt="Improving" class="nav-brand-logo"></a>
+                <span class="nav-brand-sep"></span>
+                <span class="nav-brand-app">Admin</span>
+            </div>
+            <div class="nav-right">
+                <a href="/portal" class="btn-signout">Back to portal</a>
+            </div>
+        </nav>
+
+        <div class="account-header">
+            <div class="account-header-title">User management</div>
+            <div class="account-header-sub">Create and manage portal accounts.</div>
+        </div>
+
+        <div id="flash" class="auth-flash" hidden></div>
+        <div id="reset-flash" class="auth-flash auth-flash-ok" hidden></div>
+
+        <div class="account-card">
+            <div class="section-label">Create user</div>
+            <form method="POST" action="/admin/users" class="admin-create-form">
+                <input type="text" name="username" placeholder="Username" required minlength="3" />
+                <input type="password" name="password" placeholder="Initial password" required minlength="10" />
+                <label class="admin-checkbox"><input type="checkbox" name="is_admin" /> Admin</label>
+                <button type="submit" class="btn-primary">Create</button>
+            </form>
+        </div>
+
+        <div class="account-card">
+            <div class="section-label">Users</div>
+            <table class="admin-table">
+                <thead>
+                    <tr><th>Username</th><th>Role</th><th>Created</th><th>Last login</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="users-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { renderImpersonationBanner } from '/assets/portal-session.js';
+
+        const me = await fetch('/api/me').then(r => r.ok ? r.json() : null);
+        if (!me || !me.is_admin) { location.href = '/portal'; }
+        renderImpersonationBanner(me);
+
+        const params = new URLSearchParams(location.search);
+        const flash = document.getElementById('flash');
+        if (params.get('error')) { flash.textContent = params.get('error'); flash.className = 'auth-flash auth-flash-error'; flash.hidden = false; }
+        else if (params.get('ok')) { flash.textContent = params.get('ok'); flash.className = 'auth-flash auth-flash-ok'; flash.hidden = false; }
+
+        if (params.get('reset_for') && params.get('temp')) {
+            const r = document.getElementById('reset-flash');
+            r.innerHTML = 'Temporary password for <strong>' + params.get('reset_for') + '</strong>: <code>' + params.get('temp') + '</code> — share this securely. They can change it after signing in.';
+            r.hidden = false;
+        }
+
+        const data = await fetch('/admin/users.json').then(r => r.json());
+        const tbody = document.getElementById('users-body');
+        const actorId = me.impersonating ? me.impersonator.id : me.id;
+        for (const u of data.users) {
+            const tr = document.createElement('tr');
+            const isSelf = u.id === actorId;
+            tr.innerHTML = `
+                <td>${escapeHtml(u.username)}</td>
+                <td>${u.is_admin ? '<span class="badge badge-admin">Admin</span>' : 'User'}</td>
+                <td>${u.created_at || ''}</td>
+                <td>${u.last_login_at || '—'}</td>
+                <td class="admin-actions">
+                    ${u.is_admin
+                        ? `<form method="POST" action="/admin/users/${u.id}/demote"><button ${isSelf ? 'disabled' : ''}>Demote</button></form>`
+                        : `<form method="POST" action="/admin/users/${u.id}/promote"><button>Promote</button></form>`}
+                    <form method="POST" action="/admin/users/${u.id}/reset-password"><button>Reset password</button></form>
+                    ${!u.is_admin && !isSelf ? `<form method="POST" action="/admin/impersonate/${u.id}"><button>Impersonate</button></form>` : ''}
+                    <form method="POST" action="/admin/users/${u.id}/delete" onsubmit="return confirm('Delete ${escapeHtml(u.username)}?')"><button class="btn-danger" ${isSelf ? 'disabled' : ''}>Delete</button></form>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        }
+        function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    </script>
+</body>
+</html>
