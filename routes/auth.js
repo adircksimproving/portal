@@ -45,10 +45,15 @@ authRouter.post('/login', loginLimiter, (req, res) => {
   const user = findUserByUsername(username);
   const ok = user && verifyPassword(user, password);
   if (!ok) {
-    return res.redirect('/?error=' + encodeURIComponent('Invalid username or password.'));
+    const next = req.body.next ? `&next=${encodeURIComponent(req.body.next)}` : '';
+    return res.redirect('/?error=' + encodeURIComponent('Invalid username or password.') + next);
   }
   req.session.userId = user.id;
   updateLastLogin(user.id);
+  const next = req.body.next;
+  if (typeof next === 'string' && next.startsWith('/')) {
+    return res.redirect(`/auth/handoff?return=${encodeURIComponent(next)}`);
+  }
   res.redirect('/portal');
 });
 

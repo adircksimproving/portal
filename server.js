@@ -9,9 +9,11 @@ import Database from 'better-sqlite3';
 import { mkdirSync } from 'fs';
 
 import { db, bootstrapAdmin } from './db/index.js';
+import { findUserById } from './db/users.js';
 import { loadUser, requireAuth, requireSameOrigin } from './middleware/auth.js';
 import { authRouter, profileRouter } from './routes/auth.js';
 import { adminRouter } from './routes/admin.js';
+import { mintHandoffToken, consumeHandoffToken, isAllowedReturn } from './lib/handoff.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SqliteStore = SqliteStoreFactory(session);
@@ -66,6 +68,45 @@ export function createApp() {
   app.use('/auth', authRouter);
   app.use('/profile', profileRouter);
   app.use('/admin', adminRouter);
+
+  // Cross-domain handoff for sibling apps that can't share the portal_sid
+  // cookie (e.g. different subdomains in local dev). In production, set
+  // COOKIE_DOMAIN=.up.railway.app so the browser sends portal_sid directly.
+  //
+  // GET /auth/handoff?return=<allowed-sibling-url>
+  //   If logged in: mints a one-time 60s token and 302s to return?portal_token=
+  //   If not logged in: redirects to / with the return preserved in ?next=
+  app.get('/auth/handoff', (req, res) => {
+    const returnUrl = req.query.return;
+    if (typeof returnUrl !== 'string' || !isAllowedReturn(returnUrl)) {
+      return res.status(400).send('Invalid return URL');
+    }
+    if (!req.user) {
+      return res.redirect(`/?next=${encodeURIComponent(returnUrl)}`);
+    }
+    const token = mintHandoffToken(req.user.id);
+    const dest = new URL(returnUrl);
+    dest.searchParams.set('portal_token', token);
+    res.redirect(dest.toString());
+  });
+
+  // POST /api/exchange  { token }
+  //   Server-to-server: exchanges the one-time token for the user record.
+  //   Single-use, 60s expiry. Returns the same shape as /api/me.
+  app.post('/api/exchange', (req, res) => {
+    const { token } = req.body || {};
+    const userId = consumeHandoffToken(token);
+    if (!userId) return res.status(401).json({ error: 'invalid_or_expired_token' });
+    const user = findUserById(userId);
+    if (!user) return res.status(401).json({ error: 'user_not_found' });
+    res.json({
+      id: user.id,
+      username: user.username,
+      is_admin: !!user.is_admin,
+      impersonating: false,
+      impersonator: null,
+    });
+  });
 
   app.get('/', (req, res, next) => {
     if (req.user) return res.redirect('/portal');

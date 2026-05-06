@@ -42,6 +42,16 @@
         const flash = document.getElementById('flash');
         if (error) { flash.textContent = error; flash.className = 'auth-flash auth-flash-error'; flash.hidden = false; }
         else if (ok) { flash.textContent = ok; flash.className = 'auth-flash auth-flash-ok'; flash.hidden = false; }
+
+        // Preserve ?next= through the login form so handoff can resume after login.
+        const next = params.get('next');
+        if (next) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'next';
+            input.value = next;
+            document.querySelector('form').appendChild(input);
+        }
     </script>
 </body>
 </html>
