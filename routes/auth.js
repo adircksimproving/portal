@@ -64,6 +64,13 @@ authRouter.post('/logout', (req, res) => {
   });
 });
 
+authRouter.get('/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.clearCookie('portal_sid', { path: '/' });
+    res.redirect('/');
+  });
+});
+
 export const profileRouter = Router();
 profileRouter.use(requireAuth);
 
