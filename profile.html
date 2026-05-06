@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile — Project Portal</title>
+    <link rel="stylesheet" href="/styles/layout.css">
+    <link rel="stylesheet" href="/styles/account.css">
+    <link rel="stylesheet" href="/styles/auth.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Khula:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="impersonation-banner" class="impersonation-banner" hidden></div>
+    <div class="container">
+        <nav class="nav">
+            <div class="nav-brand">
+                <a href="/portal"><img src="/assets/improving-logo-simple.png" alt="Improving" class="nav-brand-logo"></a>
+                <span class="nav-brand-sep"></span>
+                <span class="nav-brand-app">Profile</span>
+            </div>
+            <div class="nav-right">
+                <a href="/portal" class="btn-signout">Back to portal</a>
+            </div>
+        </nav>
+
+        <div class="account-header">
+            <div class="account-header-title">Your profile</div>
+            <div class="account-header-sub" id="profile-sub"></div>
+        </div>
+
+        <div id="flash" class="auth-flash" hidden></div>
+
+        <div class="account-card">
+            <div class="section-label">Username</div>
+            <form method="POST" action="/profile/username">
+                <div class="field">
+                    <input type="text" name="username" id="username-input" required minlength="3" />
+                </div>
+                <button type="submit" class="btn-primary">Update username</button>
+            </form>
+        </div>
+
+        <div class="account-card">
+            <div class="section-label">Change password</div>
+            <form method="POST" action="/profile/password">
+                <div class="field">
+                    <label for="current_password">Current password</label>
+                    <input type="password" name="current_password" id="current_password" required autocomplete="current-password" />
+                </div>
+                <div class="field">
+                    <label for="new_password">New password</label>
+                    <input type="password" name="new_password" id="new_password" required autocomplete="new-password" minlength="10" />
+                    <div class="field-hint">At least 10 characters, with letters and numbers.</div>
+                </div>
+                <button type="submit" class="btn-primary">Update password</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { renderImpersonationBanner } from '/assets/portal-session.js';
+
+        const me = await fetch('/api/me').then(r => r.ok ? r.json() : null);
+        if (!me) { location.href = '/'; }
+        document.getElementById('username-input').value = me.username;
+        document.getElementById('profile-sub').textContent = me.is_admin ? 'Admin account' : 'Standard account';
+        renderImpersonationBanner(me);
+
+        const params = new URLSearchParams(location.search);
+        const error = params.get('error');
+        const ok = params.get('ok');
+        const flash = document.getElementById('flash');
+        if (error) { flash.textContent = error; flash.className = 'auth-flash auth-flash-error'; flash.hidden = false; }
+        else if (ok) { flash.textContent = ok; flash.className = 'auth-flash auth-flash-ok'; flash.hidden = false; }
+    </script>
+</body>
+</html>
