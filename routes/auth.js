@@ -12,6 +12,23 @@ import {
 import { validateUsername, validatePassword } from '../lib/validate.js';
 import { requireAuth } from '../middleware/auth.js';
 
+const ALLOWED_RETURN_ORIGINS = [
+  'http://localhost:3002',
+  'http://localhost:3004',
+  'https://consultant-directory-app-production.up.railway.app',
+  'https://revenue-analysis-app-production.up.railway.app',
+];
+
+export function isSafeReturnUrl(url) {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return ALLOWED_RETURN_ORIGINS.includes(parsed.origin);
+  } catch {
+    return false;
+  }
+}
+
 export const authRouter = Router();
 
 const noopLimiter = (req, res, next) => next();
@@ -53,6 +70,11 @@ authRouter.post('/login', loginLimiter, (req, res) => {
   const next = req.body.next;
   if (typeof next === 'string' && next.startsWith('/')) {
     return res.redirect(`/auth/handoff?return=${encodeURIComponent(next)}`);
+  }
+  const returnUrl = req.session.return_url;
+  delete req.session.return_url;
+  if (returnUrl && isSafeReturnUrl(returnUrl)) {
+    return res.redirect(`/auth/token?return_url=${encodeURIComponent(returnUrl)}`);
   }
   res.redirect('/portal');
 });
