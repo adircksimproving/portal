@@ -64,11 +64,11 @@
 
         <div class="apps-label">Applications</div>
         <div class="app-grid">
-            <a href="https://revenue-analysis-app-production.up.railway.app/home.html" class="app-tile">
+            <a id="tile-rev" href="#" class="app-tile">
                 <div class="app-tile-icon">📈</div>
                 <div class="app-tile-name">Project Revenue Forecasting</div>
             </a>
-            <a href="https://consultant-directory-app-production.up.railway.app" class="app-tile">
+            <a id="tile-dir" href="#" class="app-tile">
                 <div class="app-tile-icon">👥</div>
                 <div class="app-tile-name">Consultant Directory</div>
             </a>
@@ -87,6 +87,22 @@
             const parts = name.split(/[.\s@_-]+/).filter(Boolean);
             return ((parts[0]?.[0] || '') + (parts[1]?.[0] || '')).toUpperCase() || name[0].toUpperCase();
         }
+
+        const isProd = window.location.hostname !== 'localhost';
+        const revBase = isProd
+            ? 'https://revenue-analysis-app-production.up.railway.app'
+            : 'http://localhost:3000';
+        const dirBase = isProd
+            ? 'https://consultant-directory-app-production.up.railway.app'
+            : 'http://localhost:3002';
+
+        function handoffUrl(appBase) {
+            const callback = `${appBase}/auth/callback?next=%2Fhome.html`;
+            return `/auth/handoff?return=${encodeURIComponent(callback)}`;
+        }
+
+        document.getElementById('tile-rev').href = handoffUrl(revBase);
+        document.getElementById('tile-dir').href = handoffUrl(dirBase);
     </script>
 </body>
 </html>

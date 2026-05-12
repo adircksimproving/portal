@@ -68,7 +68,7 @@ authRouter.post('/login', loginLimiter, (req, res) => {
   req.session.userId = user.id;
   updateLastLogin(user.id);
   const next = req.body.next;
-  if (typeof next === 'string' && next.startsWith('/')) {
+  if (typeof next === 'string' && (next.startsWith('/') || isSafeReturnUrl(next))) {
     return res.redirect(`/auth/handoff?return=${encodeURIComponent(next)}`);
   }
   const returnUrl = req.session.return_url;
