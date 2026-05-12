@@ -7,11 +7,12 @@ import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import Database from 'better-sqlite3';
 import { mkdirSync } from 'fs';
+import { randomBytes } from 'node:crypto';
 
 import { db, bootstrapAdmin } from './db/index.js';
 import { findUserById } from './db/users.js';
 import { loadUser, requireAuth, requireSameOrigin } from './middleware/auth.js';
-import { authRouter, profileRouter } from './routes/auth.js';
+import { authRouter, profileRouter, isSafeReturnUrl } from './routes/auth.js';
 import { adminRouter } from './routes/admin.js';
 import { mintHandoffToken, consumeHandoffToken, isAllowedReturn } from './lib/handoff.js';
 
@@ -27,6 +28,14 @@ const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-do-not-use-in-p
 const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || undefined;
 
 bootstrapAdmin();
+
+const tokenStore = new Map();
+setInterval(() => {
+    const now = Date.now();
+    for (const [k, v] of tokenStore) {
+        if (v.expires < now) tokenStore.delete(k);
+    }
+}, 60_000);
 
 export function createApp() {
   const app = express();
@@ -51,6 +60,22 @@ export function createApp() {
     },
   }));
 
+  // Must be before requireSameOrigin — called server-to-server from sibling apps,
+  // which send Origin: null (opaque origin) and would otherwise get 403.
+  app.post('/api/auth/exchange', (req, res) => {
+    const { token } = req.body || {};
+    if (!token) return res.status(400).json({ error: 'missing token' });
+
+    const entry = tokenStore.get(token);
+    tokenStore.delete(token);
+
+    if (!entry || entry.expires < Date.now()) {
+      return res.status(401).json({ error: 'invalid or expired token' });
+    }
+
+    res.json(entry.user);
+  });
+
   app.use(requireSameOrigin);
   app.use(loadUser);
 
@@ -63,6 +88,20 @@ export function createApp() {
       impersonating: !!req.impersonator,
       impersonator: req.impersonator ? { id: req.impersonator.id, username: req.impersonator.username } : null,
     });
+  });
+
+  // Generates a short-lived token and redirects to the app's callback URL with it
+  app.get('/auth/token', requireAuth, (req, res) => {
+    const returnUrl = req.query.return_url;
+    if (!isSafeReturnUrl(returnUrl)) return res.redirect('/portal');
+
+    const token = randomBytes(32).toString('hex');
+    tokenStore.set(token, {
+      user: { id: req.user.id, username: req.user.username, is_admin: !!req.user.is_admin },
+      expires: Date.now() + 30_000,
+    });
+
+    res.redirect(`${returnUrl}?auth_token=${encodeURIComponent(token)}`);
   });
 
   app.use('/auth', authRouter);
@@ -109,7 +148,14 @@ export function createApp() {
   });
 
   app.get('/', (req, res, next) => {
-    if (req.user) return res.redirect('/portal');
+    const returnUrl = req.query.return_url;
+    if (req.user) {
+      if (returnUrl && isSafeReturnUrl(returnUrl)) {
+        return res.redirect(`/auth/token?return_url=${encodeURIComponent(returnUrl)}`);
+      }
+      return res.redirect('/portal');
+    }
+    if (returnUrl) req.session.return_url = returnUrl;
     res.sendFile(resolve(__dirname, 'index.html'));
   });
 
