@@ -10,7 +10,7 @@ import { mkdirSync } from 'fs';
 import { randomBytes } from 'node:crypto';
 
 import { db, bootstrapAdmin } from './db/index.js';
-import { findUserById } from './db/users.js';
+import { findUserById, updateName } from './db/users.js';
 import { loadUser, requireAuth, requireSameOrigin } from './middleware/auth.js';
 import { authRouter, profileRouter, isSafeReturnUrl } from './routes/auth.js';
 import { adminRouter } from './routes/admin.js';
@@ -84,6 +84,8 @@ export function createApp() {
     res.json({
       id: req.user.id,
       username: req.user.username,
+      firstName: req.user.first_name || '',
+      lastName: req.user.last_name || '',
       is_admin: !!req.user.is_admin,
       impersonating: !!req.impersonator,
       impersonator: req.impersonator ? { id: req.impersonator.id, username: req.impersonator.username } : null,
@@ -141,10 +143,31 @@ export function createApp() {
     res.json({
       id: user.id,
       username: user.username,
+      firstName: user.first_name || '',
+      lastName: user.last_name || '',
       is_admin: !!user.is_admin,
       impersonating: false,
       impersonator: null,
     });
+  });
+
+  // PUT /api/users/name  { portalUserId, firstName, lastName }
+  // Server-to-server: allows sibling apps to sync a name update back to portal.
+  // Authenticated by PORTAL_API_SECRET env var.
+  app.put('/api/users/name', (req, res) => {
+    const secret = process.env.PORTAL_API_SECRET;
+    const authHeader = req.headers['authorization'] || '';
+    if (!secret || authHeader !== `Bearer ${secret}`) {
+      return res.status(401).json({ error: 'unauthorized' });
+    }
+    const { portalUserId, firstName, lastName } = req.body || {};
+    if (!portalUserId || typeof firstName !== 'string' || typeof lastName !== 'string') {
+      return res.status(400).json({ error: 'portalUserId, firstName, and lastName are required' });
+    }
+    const user = findUserById(portalUserId);
+    if (!user) return res.status(404).json({ error: 'user_not_found' });
+    updateName(user.id, firstName.trim(), lastName.trim());
+    res.json({ ok: true });
   });
 
   app.get('/', (req, res, next) => {

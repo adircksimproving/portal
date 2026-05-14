@@ -20,6 +20,14 @@
 
         <form method="POST" action="/auth/register" autocomplete="on">
             <div class="field">
+                <label for="first_name">First name</label>
+                <input type="text" id="first_name" name="first_name" required autocomplete="given-name" />
+            </div>
+            <div class="field">
+                <label for="last_name">Last name</label>
+                <input type="text" id="last_name" name="last_name" required autocomplete="family-name" />
+            </div>
+            <div class="field">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required autocomplete="username" />
             </div>

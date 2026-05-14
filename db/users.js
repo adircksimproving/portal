@@ -15,12 +15,16 @@ export function listUsers() {
   return db.prepare('SELECT id, username, is_admin, created_at, last_login_at FROM users ORDER BY username COLLATE NOCASE').all();
 }
 
-export function createUser({ username, password, isAdmin = false }) {
+export function createUser({ username, password, firstName = '', lastName = '', isAdmin = false }) {
   const hash = bcrypt.hashSync(password, BCRYPT_COST);
   const result = db.prepare(
-    'INSERT INTO users (username, password_hash, is_admin) VALUES (?, ?, ?)'
-  ).run(username, hash, isAdmin ? 1 : 0);
+    'INSERT INTO users (username, password_hash, first_name, last_name, is_admin) VALUES (?, ?, ?, ?, ?)'
+  ).run(username, hash, firstName, lastName, isAdmin ? 1 : 0);
   return findUserById(result.lastInsertRowid);
+}
+
+export function updateName(userId, firstName, lastName) {
+  db.prepare('UPDATE users SET first_name = ?, last_name = ? WHERE id = ?').run(firstName, lastName, userId);
 }
 
 export function verifyPassword(user, password) {
