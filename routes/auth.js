@@ -7,6 +7,7 @@ import {
   updateLastLogin,
   updateUsername,
   updatePassword,
+  updateName,
   findUserById,
 } from '../db/users.js';
 import { validateUsername, validatePassword } from '../lib/validate.js';
@@ -20,8 +21,13 @@ const loginLimiter = isTest ? noopLimiter : rateLimit({ windowMs: 60_000, max: 5
 const registerLimiter = isTest ? noopLimiter : rateLimit({ windowMs: 60_000, max: 5, standardHeaders: true, legacyHeaders: false });
 
 authRouter.post('/register', registerLimiter, (req, res) => {
+  const firstName = (req.body.first_name || '').trim();
+  const lastName = (req.body.last_name || '').trim();
   const username = (req.body.username || '').trim();
   const password = req.body.password || '';
+
+  if (!firstName) return res.redirect('/register?error=' + encodeURIComponent('First name is required.'));
+  if (!lastName) return res.redirect('/register?error=' + encodeURIComponent('Last name is required.'));
 
   const usernameErr = validateUsername(username);
   if (usernameErr) return res.redirect('/register?error=' + encodeURIComponent(usernameErr));
@@ -32,7 +38,7 @@ authRouter.post('/register', registerLimiter, (req, res) => {
     return res.redirect('/register?error=' + encodeURIComponent('That username is already taken.'));
   }
 
-  const user = createUser({ username, password, isAdmin: false });
+  const user = createUser({ username, password, firstName, lastName, isAdmin: false });
   req.session.userId = user.id;
   updateLastLogin(user.id);
   res.redirect('/portal');
@@ -73,6 +79,15 @@ authRouter.get('/logout', (req, res) => {
 
 export const profileRouter = Router();
 profileRouter.use(requireAuth);
+
+profileRouter.post('/name', (req, res) => {
+  const firstName = (req.body.first_name || '').trim();
+  const lastName = (req.body.last_name || '').trim();
+  if (!firstName) return res.redirect('/profile?error=' + encodeURIComponent('First name is required.'));
+  if (!lastName) return res.redirect('/profile?error=' + encodeURIComponent('Last name is required.'));
+  updateName(req.user.id, firstName, lastName);
+  res.redirect('/profile?ok=' + encodeURIComponent('Name updated.'));
+});
 
 profileRouter.post('/username', (req, res) => {
   const username = (req.body.username || '').trim();

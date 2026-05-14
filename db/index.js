@@ -17,6 +17,15 @@ db.pragma('foreign_keys = ON');
 const schema = readFileSync(resolve(__dirname, 'schema.sql'), 'utf8');
 db.exec(schema);
 
+// Add name columns to existing DBs that predate this field
+const existingCols = db.prepare('PRAGMA table_info(users)').all().map(c => c.name);
+if (!existingCols.includes('first_name')) {
+  db.exec("ALTER TABLE users ADD COLUMN first_name TEXT NOT NULL DEFAULT ''");
+}
+if (!existingCols.includes('last_name')) {
+  db.exec("ALTER TABLE users ADD COLUMN last_name TEXT NOT NULL DEFAULT ''");
+}
+
 export function bootstrapAdmin() {
   const username = process.env.BOOTSTRAP_ADMIN_USERNAME;
   const password = process.env.BOOTSTRAP_ADMIN_PASSWORD;

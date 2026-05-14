@@ -31,6 +31,21 @@
         <div id="flash" class="auth-flash" hidden></div>
 
         <div class="account-card">
+            <div class="section-label">Name</div>
+            <form method="POST" action="/profile/name">
+                <div class="field">
+                    <label for="first_name">First name</label>
+                    <input type="text" name="first_name" id="first_name_input" required autocomplete="given-name" />
+                </div>
+                <div class="field">
+                    <label for="last_name">Last name</label>
+                    <input type="text" name="last_name" id="last_name_input" required autocomplete="family-name" />
+                </div>
+                <button type="submit" class="btn-primary">Update name</button>
+            </form>
+        </div>
+
+        <div class="account-card">
             <div class="section-label">Username</div>
             <form method="POST" action="/profile/username">
                 <div class="field">
@@ -62,6 +77,8 @@
 
         const me = await fetch('/api/me').then(r => r.ok ? r.json() : null);
         if (!me) { location.href = '/'; }
+        document.getElementById('first_name_input').value = me.firstName || '';
+        document.getElementById('last_name_input').value = me.lastName || '';
         document.getElementById('username-input').value = me.username;
         document.getElementById('profile-sub').textContent = me.is_admin ? 'Admin account' : 'Standard account';
         renderImpersonationBanner(me);
