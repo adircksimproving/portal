@@ -27,6 +27,10 @@ const isProd = process.env.NODE_ENV === 'production';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-do-not-use-in-prod';
 const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || undefined;
 
+if (isProd && (!process.env.SESSION_SECRET || process.env.SESSION_SECRET === 'dev-secret-do-not-use-in-prod')) {
+  throw new Error('SESSION_SECRET must be set to a secure value in production');
+}
+
 bootstrapAdmin();
 
 const tokenStore = new Map();
