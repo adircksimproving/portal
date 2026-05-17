@@ -29,9 +29,11 @@ if (!existingCols.includes('last_name')) {
 export function bootstrapAdmin() {
   const username = process.env.BOOTSTRAP_ADMIN_USERNAME;
   const password = process.env.BOOTSTRAP_ADMIN_PASSWORD;
+  console.log(`Bootstrap: username=${username ? 'set' : 'MISSING'}, password=${password ? 'set' : 'MISSING'}`);
   if (!username || !password) return;
 
   const adminCount = db.prepare('SELECT COUNT(*) AS c FROM users WHERE is_admin = 1').get().c;
+  console.log(`Bootstrap: adminCount=${adminCount}`);
   if (adminCount > 0) return;
 
   const hash = bcrypt.hashSync(password, 12);
